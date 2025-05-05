@@ -1,0 +1,462 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>LocaTron</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.3/font/bootstrap-icons.css" rel="stylesheet">
+    <style>
+        body {
+            padding: 20px;
+        }
+        .nav-tabs {
+            margin-bottom: 20px;
+        }
+        .tab-content {
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-top: none;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        .count-bar {
+            background-color: #f8f9fa;
+            padding: 10px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
+        .clear-filter {
+            cursor: pointer;
+            margin-left: 10px;
+        }
+        .search-icon {
+            cursor: pointer;
+        }
+        .search-icon.green {
+            color: green;
+        }
+        .search-icon.red {
+            color: red;
+        }
+    </style>
+</head>
+<body>
+    <h1 class="text-center">LocaTron</h1>
+    <a href="/logout" class="btn btn-danger float-end">Logout</a>
+
+    <!-- Tabs -->
+    <ul class="nav nav-tabs" id="myTab" role="tablist">
+        <li class="nav-item" role="presentation">
+            <button class="nav-link active" id="database-tab" data-bs-toggle="tab" data-bs-target="#database" type="button" role="tab" aria-controls="database" aria-selected="true">
+                <i class="bi bi-table"></i> Database
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="movement-tab" data-bs-toggle="tab" data-bs-target="#movement" type="button" role="tab" aria-controls="movement" aria-selected="false">
+                <i class="bi bi-truck"></i> Machine Movement
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="add-machine-tab" data-bs-toggle="tab" data-bs-target="#add-machine" type="button" role="tab" aria-controls="add-machine" aria-selected="false">
+                <i class="bi bi-plus-circle"></i> Add Machine
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="remove-machine-tab" data-bs-toggle="tab" data-bs-target="#remove-machine" type="button" role="tab" aria-controls="remove-machine" aria-selected="false">
+                <i class="bi bi-dash-circle"></i> Remove Machine
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="edit-machine-tab" data-bs-toggle="tab" data-bs-target="#edit-machine" type="button" role="tab" aria-controls="edit-machine" aria-selected="false">
+                <i class="bi bi-pencil-square"></i> Edit Machine
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="change-password-tab" data-bs-toggle="tab" data-bs-target="#change-password" type="button" role="tab" aria-controls="change-password" aria-selected="false">
+                <i class="bi bi-key"></i> Change Password
+            </button>
+        </li>
+    </ul>
+
+    <!-- Tab Content -->
+    <div class="tab-content" id="myTabContent">
+        <!-- Database Tab -->
+        <div class="tab-pane fade show active" id="database" role="tabpanel" aria-labelledby="database-tab">
+            <h2>Database</h2>
+            <div class="count-bar">
+                <p><strong>Total Entries:</strong> <span id="totalEntries">{{ total_entries }}</span> | 
+                <strong>Filtered Entries:</strong> <span id="filteredEntries">{{ database|length }}</span></p>
+            </div>
+            <div class="row mb-3">
+                <div class="col-md-3">
+                    <div class="input-group">
+                        <input type="text" id="search-head" class="form-control" placeholder="Filter by Head Number">
+                        <span class="input-group-text clear-filter" onclick="clearFilter('search-head')">
+                            <i class="bi bi-x"></i>
+                        </span>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="input-group">
+                        <input type="text" id="search-location" class="form-control" placeholder="Filter by Location">
+                        <span class="input-group-text clear-filter" onclick="clearFilter('search-location')">
+                            <i class="bi bi-x"></i>
+                        </span>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="input-group">
+                        <input type="text" id="search-serial" class="form-control" placeholder="Filter by Serial Number">
+                        <span class="input-group-text clear-filter" onclick="clearFilter('search-serial')">
+                            <i class="bi bi-x"></i>
+                        </span>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="input-group">
+                        <input type="text" id="search-model" class="form-control" placeholder="Filter by Model Number">
+                        <span class="input-group-text clear-filter" onclick="clearFilter('search-model')">
+                            <i class="bi bi-x"></i>
+                        </span>
+                    </div>
+                </div>
+            </div>
+            <div class="mb-3">
+                <form action="/export" method="POST" class="d-inline">
+                    <button type="submit" class="btn btn-success">Export Excel</button>
+                </form>
+                <form action="/export_filtered" method="POST" class="d-inline">
+                    <input type="hidden" name="headNumber" id="headNumber" value="">
+                    <input type="hidden" name="location" id="location" value="">
+                    <input type="hidden" name="serialNumber" id="serialNumber" value="">
+                    <input type="hidden" name="modelNumber" id="modelNumber" value="">
+                    <button type="submit" class="btn btn-warning">Export Filtered Data</button>
+                </form>
+            </div>
+            <table class="table table-bordered table-striped" id="databaseTable">
+                <thead>
+                    <tr>
+                        {% for col in columns %}
+                            <th>{{ col }}</th>
+                        {% endfor %}
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for row in database %}
+                        <tr>
+                            <td>{{ loop.index }}</td> <!-- Auto Serial Number -->
+                            {% for col in columns[1:] %}
+                                <td>{{ row[col] }}</td>
+                            {% endfor %}
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Machine Movement Tab -->
+        <div class="tab-pane fade" id="movement" role="tabpanel" aria-labelledby="movement-tab">
+            <h2>Machine Movement</h2>
+            <form id="movementForm">
+                <div class="form-group">
+                    <label for="headNumber">Head Number:</label>
+                    <div class="input-group">
+                        <input type="text" id="headNumber" name="headNumber" class="form-control" required>
+                        <span class="input-group-text search-icon" id="searchHeadNumber" onclick="searchHeadNumber()">
+                            <i class="bi bi-search"></i>
+                        </span>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="currentLocation">Current Location:</label>
+                    <input type="text" id="currentLocation" name="currentLocation" class="form-control" readonly>
+                </div>
+                <div class="form-group">
+                    <label for="newLocation">New Location:</label>
+                    <input type="text" id="newLocation" name="newLocation" class="form-control" required>
+                </div>
+                <div class="form-group">
+                    <label for="handedTo">Handed Over To:</label>
+                    <input type="text" id="handedTo" name="handedTo" class="form-control">
+                </div>
+                <div class="form-group">
+                    <label for="accessories">Accessories:</label>
+                    <input type="text" id="accessories" name="accessories" class="form-control">
+                </div>
+                <button type="submit" class="btn btn-primary">Move Machine</button>
+            </form>
+        </div>
+
+        <!-- Add Machine Tab -->
+        <div class="tab-pane fade" id="add-machine" role="tabpanel" aria-labelledby="add-machine-tab">
+            <h2>Add Machine</h2>
+            <form id="addMachineForm">
+                {% for col in columns[1:-1] %} <!-- Exclude TimeStamp -->
+                    <div class="form-group">
+                        <label for="{{ col }}">{{ col }}:</label>
+                        <input type="text" id="{{ col }}" name="{{ col }}" class="form-control">
+                    </div>
+                {% endfor %}
+                <button type="submit" class="btn btn-primary">Add Machine</button>
+            </form>
+        </div>
+
+        <!-- Remove Machine Tab -->
+        <div class="tab-pane fade" id="remove-machine" role="tabpanel" aria-labelledby="remove-machine-tab">
+            <h2>Remove Machine</h2>
+            <form id="removeMachineForm">
+                <div class="form-group">
+                    <label for="headNumber">Head Number:</label>
+                    <div class="input-group">
+                        <input type="text" id="headNumber" name="headNumber" class="form-control" required>
+                        <span class="input-group-text search-icon" id="searchHeadNumber" onclick="searchHeadNumberForRemoval()">
+                            <i class="bi bi-search"></i>
+                        </span>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="currentLocation">Current Location:</label>
+                    <input type="text" id="currentLocation" name="currentLocation" class="form-control" readonly>
+                </div>
+                <button type="submit" class="btn btn-danger">Remove Machine</button>
+            </form>
+        </div>
+
+        <!-- Edit Machine Tab -->
+        <div class="tab-pane fade" id="edit-machine" role="tabpanel" aria-labelledby="edit-machine-tab">
+            <h2>Edit Machine</h2>
+            <form id="editMachineForm">
+                <div class="form-group">
+                    <label for="headNumber">Head Number:</label>
+                    <div class="input-group">
+                        <input type="text" id="headNumber" name="headNumber" class="form-control" required>
+                        <span class="input-group-text search-icon" id="searchHeadNumber" onclick="searchHeadNumberForEdit()">
+                            <i class="bi bi-search"></i>
+                        </span>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="currentLocation">Current Location:</label>
+                    <input type="text" id="currentLocation" name="currentLocation" class="form-control" readonly>
+                </div>
+                {% for col in columns[1:-1] %} <!-- Exclude TimeStamp -->
+                    <div class="form-group">
+                        <label for="{{ col }}">{{ col }}:</label>
+                        <input type="text" id="{{ col }}" name="{{ col }}" class="form-control">
+                    </div>
+                {% endfor %}
+                <button type="submit" class="btn btn-primary">Edit Machine</button>
+            </form>
+        </div>
+
+        <!-- Change Password Tab -->
+        <div class="tab-pane fade" id="change-password" role="tabpanel" aria-labelledby="change-password-tab">
+            <h2>Change Password</h2>
+            <form action="/reset_password" method="POST">
+                <div class="form-group">
+                    <label for="old_password">Old Password:</label>
+                    <input type="password" id="old_password" name="old_password" class="form-control" required>
+                </div>
+                <div class="form-group">
+                    <label for="new_password">New Password:</label>
+                    <input type="password" id="new_password" name="new_password" class="form-control" required>
+                </div>
+                <div class="form-group">
+                    <label for="confirm_password">Confirm Password:</label>
+                    <input type="password" id="confirm_password" name="confirm_password" class="form-control" required>
+                </div>
+                <button type="submit" class="btn btn-primary">Change Password</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Custom JS -->
+    <script>
+        function searchHeadNumber() {
+            const headNumber = document.getElementById('headNumber').value.trim(); // Trim whitespace
+            if (!headNumber) {
+                alert("Please enter a Head Number.");
+                return;
+            }
+
+            fetch(`/get_machine?headNumber=${headNumber}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        document.getElementById('currentLocation').value = data.machine['Current Location'];
+                    } else {
+                        alert(data.message); // Show error message if machine is not found
+                    }
+                })
+                .catch(error => {
+                    console.error("Error fetching machine:", error);
+                    alert("An error occurred while fetching the machine details.");
+                });
+        }
+
+        function searchHeadNumberForRemoval() {
+            const headNumber = document.getElementById('headNumber').value.trim(); // Trim whitespace
+            if (!headNumber) {
+                alert("Please enter a Head Number.");
+                return;
+            }
+
+            fetch(`/get_machine?headNumber=${headNumber}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        document.getElementById('currentLocation').value = data.machine['Current Location'];
+                    } else {
+                        alert(data.message); // Show error message if machine is not found
+                    }
+                })
+                .catch(error => {
+                    console.error("Error fetching machine:", error);
+                    alert("An error occurred while fetching the machine details.");
+                });
+        }
+
+        function searchHeadNumberForEdit() {
+            const headNumber = document.getElementById('headNumber').value.trim(); // Trim whitespace
+            if (!headNumber) {
+                alert("Please enter a Head Number.");
+                return;
+            }
+
+            fetch(`/get_machine?headNumber=${headNumber}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        document.getElementById('currentLocation').value = data.machine['Current Location'];
+                        for (const col of {{ columns[1:-1] | tojson }}) {
+                            document.getElementById(col).value = data.machine[col];
+                        }
+                    } else {
+                        alert(data.message); // Show error message if machine is not found
+                    }
+                })
+                .catch(error => {
+                    console.error("Error fetching machine:", error);
+                    alert("An error occurred while fetching the machine details.");
+                });
+        }
+
+        function clearFilter(filterId) {
+            document.getElementById(filterId).value = '';
+        }
+
+        // Update filtered entries count
+        function updateFilteredEntries() {
+            const headNumber = document.getElementById('search-head').value.toLowerCase();
+            const location = document.getElementById('search-location').value.toLowerCase();
+            const serialNumber = document.getElementById('search-serial').value.toLowerCase();
+            const modelNumber = document.getElementById('search-model').value.toLowerCase();
+
+            const rows = document.querySelectorAll("#databaseTable tbody tr");
+            let filteredCount = 0;
+
+            rows.forEach(row => {
+                const headNumberCell = row.cells[5].textContent.toLowerCase();
+                const locationCell = row.cells[6].textContent.toLowerCase();
+                const serialNumberCell = row.cells[4].textContent.toLowerCase();
+                const modelNumberCell = row.cells[3].textContent.toLowerCase();
+
+                if (headNumberCell.includes(headNumber) &&
+                    locationCell.includes(location) &&
+                    serialNumberCell.includes(serialNumber) &&
+                    modelNumberCell.includes(modelNumber)) {
+                    row.style.display = "";
+                    filteredCount++;
+                } else {
+                    row.style.display = "none";
+                }
+            });
+
+            document.getElementById('filteredEntries').textContent = filteredCount;
+        }
+
+        // Attach event listeners to filter inputs
+        document.getElementById('search-head').addEventListener('input', updateFilteredEntries);
+        document.getElementById('search-location').addEventListener('input', updateFilteredEntries);
+        document.getElementById('search-serial').addEventListener('input', updateFilteredEntries);
+        document.getElementById('search-model').addEventListener('input', updateFilteredEntries);
+
+        // Form submission handlers
+        document.getElementById('movementForm').addEventListener('submit', function (e) {
+            e.preventDefault();
+            const formData = new FormData(this);
+            fetch('/move_machine', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert(data.message);
+                    window.location.reload();
+                } else {
+                    alert(data.message);
+                }
+            });
+        });
+
+        document.getElementById('addMachineForm').addEventListener('submit', function (e) {
+            e.preventDefault();
+            const formData = new FormData(this);
+            fetch('/add_machine', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert(data.message);
+                    window.location.reload();
+                } else {
+                    alert(data.message);
+                }
+            });
+        });
+
+        document.getElementById('removeMachineForm').addEventListener('submit', function (e) {
+            e.preventDefault();
+            const formData = new FormData(this);
+            fetch('/remove_machine', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert(data.message);
+                    window.location.reload();
+                } else {
+                    alert(data.message);
+                }
+            });
+        });
+
+        document.getElementById('editMachineForm').addEventListener('submit', function (e) {
+            e.preventDefault();
+            const formData = new FormData(this);
+            fetch('/edit_machine', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert(data.message);
+                    window.location.reload();
+                } else {
+                    alert(data.message);
+                }
+            });
+        });
+    </script>
+</body>
+</html>

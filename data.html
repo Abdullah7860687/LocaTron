@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Database</title>
+    <style>
+        #search {
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Database</h1>
+    <a href="/">Back to Home</a>
+    <input type="text" id="search" placeholder="Search...">
+    <table border="1" id="databaseTable">
+        <thead>
+            <tr>
+                {% for col in columns %}
+                    <th>{{ col }}</th>
+                {% endfor %}
+            </tr>
+        </thead>
+        <tbody>
+            {% for row in database %}
+                <tr>
+                    {% for col in columns %}
+                        <td>{{ row[col] }}</td>
+                    {% endfor %}
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <script>
+        document.getElementById("search").addEventListener("input", function () {
+            const searchTerm = this.value.toLowerCase();
+            const rows = document.querySelectorAll("#databaseTable tbody tr");
+            rows.forEach(row => {
+                const text = row.textContent.toLowerCase();
+                row.style.display = text.includes(searchTerm) ? "" : "none";
+            });
+        });
+    </script>
+</body>
+</html>
