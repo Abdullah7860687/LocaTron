@@ -1,0 +1,42 @@
+2025-03-11 21:24:49 - admin - Logged in
+2025-03-11 21:24:59 - unknown - Logged out
+2025-03-11 21:34:13 - admin - Logged in
+2025-03-11 21:34:28 - admin - Database imported from Excel
+2025-03-11 21:35:15 - unknown - Logged out
+2025-03-11 21:40:56 - admin - Logged in
+2025-03-11 21:59:41 - admin - Database imported from Excel
+2025-03-11 22:09:20 - admin - Database exported to Excel
+2025-03-11 22:09:32 - admin - Database imported from Excel
+2025-03-11 22:14:53 - admin - Database imported from Excel
+2025-03-11 22:21:46 - admin - Database imported from Excel
+2025-03-11 22:48:21 - admin - Database exported to Excel
+2025-03-11 22:49:20 - unknown - Logged out
+2025-03-11 22:49:32 - admin - Logged in
+2025-03-11 22:50:32 - admin - Machine added
+2025-03-12 18:46:56 - admin - Logged in
+2025-03-12 18:47:03 - admin - Database exported to Excel
+2025-03-12 20:56:29 - admin - Machine SN-01 moved to Room
+2025-03-12 21:15:45 - admin - Machine SN-02 moved to Room
+2025-03-12 21:16:18 - admin - Machine added
+2025-03-12 21:16:33 - admin - Machine ff removed
+2025-03-12 21:34:28 - admin - Machine SN-01 moved to q
+2025-03-12 21:51:15 - unknown - Logged out
+2025-03-12 21:51:25 - admin - Logged in
+2025-03-12 21:51:59 - unknown - Logged out
+2025-03-12 21:52:08 - admin - Logged in
+2025-03-12 21:57:39 - unknown - Logged out
+2025-03-12 21:57:46 - admin - Logged in
+2025-03-12 22:01:15 - unknown - Logged out
+2025-03-13 17:53:52 - admin - Logged in
+2025-03-13 17:55:17 - admin - Machine SN-01 moved to a (Pending Authentication)
+2025-03-13 20:09:48 - unknown - Logged out
+2025-03-13 20:09:56 - admin - Logged in
+2025-03-13 20:11:10 - unknown - Logged out
+2025-03-13 22:34:50 - admin - Logged in
+2025-03-13 22:58:42 - unknown - Logged out
+2025-03-16 20:37:14 - admin - Logged in
+2025-03-16 20:45:54 - admin - Logged in
+2025-03-16 21:32:57 - admin - Machine SN-01 moved to Line 10
+2025-03-16 21:33:17 - admin - Machine added
+2025-03-16 21:33:46 - admin - Machine e edited
+2025-03-16 21:34:09 - admin - Machine e removed
